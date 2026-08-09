@@ -1,0 +1,43 @@
+# Render.com Blueprint — lets you deploy this agent from the Render website
+# with no terminal. In Render: New +  ->  Blueprint  ->  connect this repo.
+# Render reads this file, creates the service, then asks you to fill in the
+# secret values (marked "sync: false") in its dashboard. See docs/SETUP.md.
+
+services:
+  - type: web
+    name: teams-ai-support-agent
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      # --- Teams / Bot identity (fill in Render dashboard) ---
+      - key: MicrosoftAppId
+        sync: false
+      - key: MicrosoftAppPassword
+        sync: false
+      - key: MicrosoftAppType
+        value: MultiTenant
+      - key: MicrosoftAppTenantId
+        sync: false
+
+      # --- AI brain (default: Google Gemini, free) ---
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+
+      # --- Memory ---
+      - key: MEMORY_BACKEND
+        value: file
+      - key: MEMORY_TURNS
+        value: "12"
+      # If you upgrade to Upstash (recommended), set these in the dashboard
+      # and change MEMORY_BACKEND to "upstash":
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false

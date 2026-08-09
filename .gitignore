@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Environment / secrets  (NEVER commit real keys)
+.env
+.env.local
+
+# Persistent memory (file backend) — local data, not for git
+data/
+
+# Logs & OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Build output
+appPackage/*.zip

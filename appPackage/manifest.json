@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "<<MICROSOFT_APP_ID>>",
+  "packageName": "com.yourbusiness.supportagent",
+  "developer": {
+    "name": "Your Business Name",
+    "websiteUrl": "https://www.example.com",
+    "privacyUrl": "https://www.example.com/privacy",
+    "termsOfUseUrl": "https://www.example.com/terms"
+  },
+  "name": {
+    "short": "Support Assistant",
+    "full": "AI Customer Support Assistant"
+  },
+  "description": {
+    "short": "A 24/7 AI assistant that answers customer questions professionally.",
+    "full": "A professional AI-powered customer support assistant. Ask about services, pricing, hours, and more — available any time, day or night. Replace this text with your own business description before publishing."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#2563EB",
+  "bots": [
+    {
+      "botId": "<<MICROSOFT_APP_ID>>",
+      "scopes": ["personal", "team", "groupChat"],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": ["personal", "team", "groupChat"],
+          "commands": [
+            { "title": "help", "description": "Show what I can do" },
+            { "title": "reset", "description": "Clear our conversation history" }
+          ]
+        }
+      ]
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": []
+}

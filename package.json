@@ -1,0 +1,20 @@
+{
+  "name": "teams-ai-support-agent",
+  "version": "1.0.0",
+  "description": "A professional, 24/7 customer-support AI agent for Microsoft Teams. Free AI brain (Google Gemini by default), persistent memory, and a rebrandable template you can sell to clients.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "botbuilder": "^4.23.1",
+    "dotenv": "^16.4.5",
+    "restify": "^11.1.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
