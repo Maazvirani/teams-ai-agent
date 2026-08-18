@@ -1,28 +1,24 @@
-# Render.com Blueprint — lets you deploy this agent from the Render website
-# with no terminal. In Render: New +  ->  Blueprint  ->  connect this repo.
+# Render.com Blueprint — deploys V.I.R.A.N.I. from GitHub with no terminal.
+# In Render:  New +  →  Blueprint  →  connect this repository.
 # Render reads this file, creates the service, then asks you to fill in the
-# secret values (marked "sync: false") in its dashboard. See docs/SETUP.md.
+# values marked "sync: false" in its dashboard. See docs/SETUP.md.
 
 services:
   - type: web
-    name: teams-ai-support-agent
+    name: virani
     runtime: node
     plan: free
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
     envVars:
-      # --- Teams / Bot identity (fill in Render dashboard) ---
-      - key: MicrosoftAppId
+      # --- Required: your PIN and a session secret -----------------------
+      - key: OWNER_PIN
         sync: false
-      - key: MicrosoftAppPassword
-        sync: false
-      - key: MicrosoftAppType
-        value: MultiTenant
-      - key: MicrosoftAppTenantId
-        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
 
-      # --- AI brain (default: Google Gemini, free) ---
+      # --- Required: the free AI brain -----------------------------------
       - key: AI_PROVIDER
         value: gemini
       - key: GEMINI_API_KEY
@@ -30,14 +26,42 @@ services:
       - key: GEMINI_MODEL
         value: gemini-2.0-flash
 
-      # --- Memory ---
+      # --- Who you are ----------------------------------------------------
+      - key: OWNER_NAME
+        sync: false
+      - key: OWNER_TIMEZONE
+        value: Asia/Karachi
+      - key: OWNER_CITY
+        value: Karachi
+      - key: WAKE_WORD
+        value: virani
+
+      # --- Memory (switch to "upstash" once you have a free database) -----
       - key: MEMORY_BACKEND
         value: file
-      - key: MEMORY_TURNS
-        value: "12"
-      # If you upgrade to Upstash (recommended), set these in the dashboard
-      # and change MEMORY_BACKEND to "upstash":
       - key: UPSTASH_REDIS_REST_URL
         sync: false
       - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+
+      # --- Your public address, e.g. https://virani.onrender.com ----------
+      - key: PUBLIC_URL
+        sync: false
+
+      # --- Optional: Gmail + Calendar -------------------------------------
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+      # --- Optional: automatic morning briefing, e.g. 07:30 ---------------
+      - key: DAILY_BRIEFING_TIME
+        sync: false
+
+      # --- Push notification keys (generated on first boot if left blank) -
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
         sync: false

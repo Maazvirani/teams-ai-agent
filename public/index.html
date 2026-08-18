@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050912">
+<meta name="description" content="V.I.R.A.N.I. — Virtual Intelligent Response Assistant &amp; Network Interface">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VIRANI">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="stylesheet" href="/styles.css">
+<title>V.I.R.A.N.I.</title>
+</head>
+<body>
+
+<!-- ── Sign in ─────────────────────────────────────────────────────────── -->
+<section id="lock" class="screen lock">
+  <div class="reactor small" aria-hidden="true">
+    <div class="ring r1"></div><div class="ring r2"></div><div class="core"></div>
+  </div>
+  <h1 class="wordmark">V.I.R.A.N.I.</h1>
+  <p class="subtitle">Virtual Intelligent Response Assistant &amp; Network Interface</p>
+  <form id="loginForm" autocomplete="off">
+    <input id="pin" type="password" inputmode="numeric" placeholder="Owner PIN" aria-label="Owner PIN" required>
+    <button type="submit" class="primary">Authenticate</button>
+  </form>
+  <p id="lockError" class="error" role="alert"></p>
+</section>
+
+<!-- ── Main interface ──────────────────────────────────────────────────── -->
+<main id="app" class="screen hidden">
+  <header class="hud-top">
+    <div class="brand">
+      <span class="dot" id="onlineDot"></span>
+      <span class="name">V.I.R.A.N.I.</span>
+    </div>
+    <div class="top-actions">
+      <button id="wakeToggle" class="chip" title="Always listen for the wake word" aria-pressed="false">
+        Wake word: off
+      </button>
+      <button id="settingsBtn" class="icon-btn" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <button id="orb" class="reactor" aria-label="Tap to speak">
+      <div class="ring r1"></div>
+      <div class="ring r2"></div>
+      <div class="ring r3"></div>
+      <div class="core"></div>
+      <div class="pulse"></div>
+    </button>
+    <p id="status" class="status">Tap the core and speak</p>
+    <p id="interim" class="interim"></p>
+  </div>
+
+  <div id="log" class="log" aria-live="polite"></div>
+
+  <form id="composer" class="composer" autocomplete="off">
+    <button type="button" id="micBtn" class="mic" aria-label="Speak">🎙</button>
+    <input id="text" type="text" placeholder="…or type a command" aria-label="Type a command">
+    <button type="submit" class="send" aria-label="Send">➤</button>
+  </form>
+</main>
+
+<!-- ── Settings ────────────────────────────────────────────────────────── -->
+<aside id="settings" class="panel hidden" aria-label="Settings">
+  <div class="panel-head">
+    <h2>Systems</h2>
+    <button id="closeSettings" class="icon-btn" aria-label="Close">✕</button>
+  </div>
+
+  <div class="panel-body">
+    <section>
+      <h3>Voice</h3>
+      <label class="row"><span>Speak replies</span>
+        <input type="checkbox" id="speakToggle" checked></label>
+      <label class="row"><span>Voice</span>
+        <select id="voiceSelect"></select></label>
+      <label class="row"><span>Speed</span>
+        <input type="range" id="rate" min="0.7" max="1.4" step="0.05" value="1"></label>
+      <button id="testVoice" class="ghost">Test voice</button>
+    </section>
+
+    <section>
+      <h3>Notifications</h3>
+      <p class="hint">Lets VIRANI reach you when the app is closed — this is what makes reminders work 24/7.</p>
+      <button id="enablePush" class="ghost">Enable on this device</button>
+      <button id="testPush" class="ghost">Send test notification</button>
+      <p id="pushState" class="hint"></p>
+    </section>
+
+    <section id="googleSection">
+      <h3>Google</h3>
+      <p class="hint">Gmail and Calendar control.</p>
+      <p id="googleState" class="hint"></p>
+      <button id="googleConnect" class="ghost">Connect Google</button>
+      <button id="googleDisconnect" class="ghost danger hidden">Disconnect</button>
+    </section>
+
+    <section>
+      <h3>Reminders</h3>
+      <ul id="reminderList" class="list"></ul>
+    </section>
+
+    <section>
+      <h3>What I remember</h3>
+      <ul id="factList" class="list"></ul>
+    </section>
+
+    <section>
+      <h3>Session</h3>
+      <p id="sysInfo" class="hint"></p>
+      <button id="clearChat" class="ghost">Clear conversation</button>
+      <button id="signOut" class="ghost danger">Sign out of this device</button>
+    </section>
+  </div>
+</aside>
+
+<div id="scrim" class="scrim hidden"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>

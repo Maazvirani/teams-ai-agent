@@ -1,20 +1,22 @@
 {
-  "name": "teams-ai-support-agent",
-  "version": "1.0.0",
-  "description": "A professional, 24/7 customer-support AI agent for Microsoft Teams. Free AI brain (Google Gemini by default), persistent memory, and a rebrandable template you can sell to clients.",
+  "name": "virani-ai",
+  "version": "2.0.0",
+  "description": "V.I.R.A.N.I. — Virtual Intelligent Response Assistant & Network Interface. A real, cloud-hosted, 24/7 Jarvis-style voice assistant: talks, listens, searches the live web, sets reminders, remembers you, and controls Gmail & Google Calendar.",
   "main": "src/index.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "keys": "node scripts/generate-keys.js"
   },
   "dependencies": {
     "botbuilder": "^4.23.1",
     "dotenv": "^16.4.5",
-    "restify": "^11.1.0"
+    "express": "^4.19.2",
+    "web-push": "^3.6.7"
   },
-  "author": "",
+  "author": "Virani",
   "license": "MIT"
 }

@@ -3,43 +3,56 @@
   "manifestVersion": "1.17",
   "version": "1.0.0",
   "id": "<<MICROSOFT_APP_ID>>",
-  "packageName": "com.yourbusiness.supportagent",
+  "packageName": "com.virani.assistant",
   "developer": {
-    "name": "Your Business Name",
-    "websiteUrl": "https://www.example.com",
-    "privacyUrl": "https://www.example.com/privacy",
-    "termsOfUseUrl": "https://www.example.com/terms"
+    "name": "Virani",
+    "websiteUrl": "https://example.com",
+    "privacyUrl": "https://example.com/privacy",
+    "termsOfUseUrl": "https://example.com/terms"
   },
   "name": {
-    "short": "Support Assistant",
-    "full": "AI Customer Support Assistant"
+    "short": "VIRANI",
+    "full": "V.I.R.A.N.I. \u2014 Virtual Intelligent Response Assistant & Network Interface"
   },
   "description": {
-    "short": "A 24/7 AI assistant that answers customer questions professionally.",
-    "full": "A professional AI-powered customer support assistant. Ask about services, pricing, hours, and more — available any time, day or night. Replace this text with your own business description before publishing."
+    "short": "Your personal AI assistant: live web search, reminders, memory, Gmail and Calendar.",
+    "full": "V.I.R.A.N.I. is a personal AI assistant with real tools. It searches the live web, sets reminders that fire even when you are away, remembers what matters about you, and manages your Gmail and Google Calendar. This Teams app is the text front door \u2014 the full voice experience lives in the VIRANI web app."
   },
   "icons": {
     "color": "color.png",
     "outline": "outline.png"
   },
-  "accentColor": "#2563EB",
+  "accentColor": "#0A1120",
   "bots": [
     {
       "botId": "<<MICROSOFT_APP_ID>>",
-      "scopes": ["personal", "team", "groupChat"],
+      "scopes": [
+        "personal",
+        "team",
+        "groupChat"
+      ],
       "supportsFiles": false,
       "isNotificationOnly": false,
       "commandLists": [
         {
-          "scopes": ["personal", "team", "groupChat"],
+          "scopes": [
+            "personal",
+            "team",
+            "groupChat"
+          ],
           "commands": [
-            { "title": "help", "description": "Show what I can do" },
-            { "title": "reset", "description": "Clear our conversation history" }
+            {
+              "title": "reset",
+              "description": "Clear our conversation history"
+            }
           ]
         }
       ]
     }
   ],
-  "permissions": ["identity", "messageTeamMembers"],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
   "validDomains": []
 }
