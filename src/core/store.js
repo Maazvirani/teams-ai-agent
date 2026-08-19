@@ -57,9 +57,23 @@ class UpstashBackend {
     this.name = 'upstash';
     this.url = config.upstash.url.replace(/\/+$/, '');
     this.token = config.upstash.token;
+
     if (!this.url || !this.token) {
       throw new Error(
-        'MEMORY_BACKEND=upstash but UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN are missing.'
+        'MEMORY_BACKEND is set to "upstash" but UPSTASH_REDIS_REST_URL and/or ' +
+          'UPSTASH_REDIS_REST_TOKEN are empty. Add both in your host\'s environment settings.'
+      );
+    }
+
+    // Fail here, with an explanation, rather than deep inside fetch() later.
+    try {
+      // eslint-disable-next-line no-new
+      new URL(this.url);
+    } catch (_) {
+      throw new Error(
+        `UPSTASH_REDIS_REST_URL is not a valid address: "${this.url}". ` +
+          'Paste only the address itself, e.g. https://your-db-12345.upstash.io — ' +
+          'not the whole UPSTASH_REDIS_REST_URL="..." line that Upstash copies for you.'
       );
     }
   }

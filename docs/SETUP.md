@@ -54,6 +54,25 @@ Do this now rather than later, so VIRANI never forgets anything from day one.
    - `UPSTASH_REDIS_REST_URL`
    - `UPSTASH_REDIS_REST_TOKEN`
 
+> **Watch out for Upstash's copy button.** It copies the whole line, including
+> the name and the quote marks:
+>
+> ```
+> UPSTASH_REDIS_REST_URL="https://your-db-12345.upstash.io"
+> ```
+>
+> When you paste into a hosting dashboard, the **Name** and **Value** are
+> separate boxes. The Value box should contain only the address itself:
+>
+> ```
+> https://your-db-12345.upstash.io
+> ```
+>
+> VIRANI now strips a stray name and quotes automatically, so a whole pasted
+> line still works — but clean values are easier to read back later.
+>
+> The **token is a password.** Keep it private; the URL on its own is harmless.
+
 This is what makes VIRANI remember your name, your contacts and your reminders
 permanently, even after the server restarts.
 

@@ -142,6 +142,15 @@ connect again to re-approve.
 
 ## The brain
 
+**"Failed to parse URL from UPSTASH_REDIS_REST_URL=..."**
+The value contains its own name and quote marks, because Upstash's copy button
+copies the whole `.env` line. In your host's environment settings the Name and
+Value are separate boxes — the Value should be only `https://your-db.upstash.io`.
+Newer builds strip this automatically, so redeploying also fixes it.
+
+**"UPSTASH_REDIS_REST_URL is not a valid address."**
+Same cause, caught earlier with a clearer message. Fix the Value box as above.
+
 **"API key not valid."**
 `GEMINI_API_KEY` is wrong or has a stray space. Make a fresh one at
 <https://aistudio.google.com/apikey>.
