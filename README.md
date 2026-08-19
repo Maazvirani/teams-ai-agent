@@ -47,6 +47,10 @@ falls back to the free voice automatically if the quota runs out.
 **→ Follow [`docs/SETUP.md`](docs/SETUP.md).** It is click-by-click, no terminal
 needed, about 15 minutes.
 
+**No credit card?** You never need one. If a host asks, see
+[`docs/NO-CREDIT-CARD.md`](docs/NO-CREDIT-CARD.md) — the repo ships a `Dockerfile`
+so it runs anywhere.
+
 The short version:
 
 1. Get a free **Gemini API key** — <https://aistudio.google.com/apikey>
@@ -136,6 +140,13 @@ node scripts/selftest.js     # 14 checks against a fake model — no quota spent
 It covers the agent loop, tool round-trips, parallel calls, reminder
 persistence, contact-to-WhatsApp resolution, the calculator (including that it
 refuses to evaluate code), location threading, auth, and the HTTP API.
+
+### Run it in Docker
+
+```bash
+docker build -t virani .
+docker run -p 7860:7860 --env-file .env virani
+```
 
 ### Run it locally
 

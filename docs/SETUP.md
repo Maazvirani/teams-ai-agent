@@ -20,6 +20,21 @@ steps 5–8 make it a proper 24/7 one.
 
 ## Step 2 — Deploy it (5 min, free)
 
+> ### ⚠ If Render asks for a credit card
+>
+> **Don't enter one.** The card prompt comes from the *Blueprint* flow, not from
+> free hosting. Creating the service by hand skips it entirely and gives you the
+> identical result — the only difference is that you type the settings in rather
+> than Render reading them from `render.yaml`.
+>
+> Use **Step 2B** below instead of Step 2A. It takes about three minutes longer.
+> If Render still insists on a card even for a manual Free web service, jump to
+> [`NO-CREDIT-CARD.md`](NO-CREDIT-CARD.md) for hosts that never ask for one.
+
+---
+
+## Step 2A — Deploy with a Blueprint (fastest, may ask for a card)
+
 1. Go to <https://render.com> → **Get Started** → sign in **with GitHub**
 2. **New +** → **Blueprint**
 3. Pick this repository (`teams-ai-agent`) and the branch
@@ -36,6 +51,56 @@ steps 5–8 make it a proper 24/7 one.
 
 Everything else can keep its default. Click **Create / Deploy** and wait for the
 build to go green (1–2 minutes).
+
+---
+
+## Step 2B — Deploy by hand (no credit card)
+
+Use this if Step 2A asked you for payment details.
+
+1. Render dashboard → **New +** → **Web Service** (*not* Blueprint)
+2. **Connect a repository** → authorise GitHub → pick `teams-ai-agent`
+3. Fill in the form:
+
+| Field | Value |
+|---|---|
+| Name | `virani` |
+| Branch | `claude/jarvis-ai-voice-agent-1xaoy5` |
+| Region | whichever is nearest you |
+| Root Directory | *leave blank* |
+| Runtime / Language | **Node** |
+| Build Command | `npm install` |
+| Start Command | `npm start` |
+| Instance Type | **Free** ← make sure this is selected |
+
+4. Scroll to **Environment Variables**. Rather than adding them one at a time,
+   click **Add from .env** and paste this whole block, editing the two lines
+   marked `CHANGE ME`:
+
+```
+OWNER_PIN=246810
+GEMINI_API_KEY=paste-your-AIza-key-here
+AI_PROVIDER=gemini
+GEMINI_MODEL=gemini-2.0-flash
+OWNER_NAME=Maaz
+OWNER_TIMEZONE=Asia/Karachi
+OWNER_CITY=Karachi
+WAKE_WORD=virani
+MEMORY_BACKEND=file
+TTS_PROVIDER=browser
+SESSION_SECRET=change-this-to-any-long-random-string
+```
+
+   `OWNER_PIN` and `SESSION_SECRET` are the two `CHANGE ME` lines — pick your own
+   PIN, and make the secret any long random string.
+
+5. **Create Web Service**. Wait for the build to go green.
+
+Then carry on with Step 3 exactly as written. `PUBLIC_URL` gets added there.
+
+> **Why this works:** `render.yaml` is only a convenience — it pre-fills the same
+> form. Nothing in VIRANI needs Blueprints, so a hand-made Free web service is
+> functionally identical.
 
 ---
 
