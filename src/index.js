@@ -20,6 +20,8 @@ const { think } = require('./core/brain');
 const { buildSystemPrompt } = require('./core/persona');
 const toolRegistry = require('./tools');
 const { icon } = require('./core/icon');
+const { documentPage } = require('./core/render');
+const { findById: findDocument } = require('./tools/documents');
 const voice = require('./core/voice');
 const { KEY: REMINDERS_KEY, render: renderReminder, activeReminders } = require('./tools/reminders');
 const { allFacts } = require('./tools/knowledge');
@@ -48,7 +50,8 @@ app.get(['/health', '/healthz'], (req, res) => {
     status: 'ok',
     assistant: config.name,
     aiProvider: config.aiProvider,
-    memory: config.memoryBackend,
+    memory: store.degraded ? 'file (upstash failed)' : config.memoryBackend,
+    memoryWarning: store.degraded || undefined,
     google: config.googleEnabled ? 'configured' : 'off',
     tools: toolRegistry.names().length,
     time: new Date().toISOString(),
@@ -59,6 +62,19 @@ app.get(['/health', '/healthz'], (req, res) => {
 app.get('/icon-:size.png', (req, res) => {
   const png = icon(req.params.size);
   res.set('Content-Type', 'image/png').set('Cache-Control', 'public, max-age=604800').send(png);
+});
+
+// Documents VIRANI wrote. The link's random id is the permission to read it,
+// so a document can be sent straight to a client without them signing in.
+app.get('/d/:id', async (req, res) => {
+  try {
+    const doc = await findDocument(req.params.id);
+    if (!doc) return res.status(404).send(page('Not found', 'That document does not exist, or it was deleted.'));
+    res.set('Content-Type', 'text/html; charset=utf-8').send(documentPage(doc));
+  } catch (err) {
+    console.error('[document]', err.message);
+    res.status(500).send(page('Could not open it', err.message));
+  }
 });
 
 // What the login screen needs to know before anyone has signed in.
@@ -315,7 +331,7 @@ async function start() {
     console.log(line);
     console.log(`  Listening   : http://localhost:${config.port}`);
     console.log(`  AI brain    : ${config.aiProvider} (${config[config.aiProvider]?.model || 'n/a'})`);
-    console.log(`  Memory      : ${config.memoryBackend}`);
+    console.log(`  Memory      : ${store.degraded ? 'file — PERMANENT MEMORY OFF' : config.memoryBackend}`);
     console.log(`  Timezone    : ${config.timezone}`);
     console.log(`  Public URL  : ${config.publicUrl || '(detected from traffic)'}`);
     console.log(`  Tools       : ${toolRegistry.names().length} — ${toolRegistry.names().join(', ')}`);

@@ -112,9 +112,27 @@ class UpstashBackend {
 // ---------------------------------------------------------------------------
 class Store {
   constructor() {
-    this.backend =
-      config.memoryBackend === 'upstash' ? new UpstashBackend() : new FileBackend();
-    console.log(`[store] backend = ${this.backend.name}`);
+    this.degraded = '';
+
+    if (config.memoryBackend === 'upstash') {
+      try {
+        this.backend = new UpstashBackend();
+      } catch (err) {
+        // A forgetful assistant is far better than a dead one: fall back to
+        // disk, but say so loudly and report it in /health so it is not missed.
+        this.degraded = err.message;
+        this.backend = new FileBackend();
+        console.error('');
+        console.error('  ⚠  PERMANENT MEMORY IS NOT ACTIVE');
+        console.error(`     ${err.message}`);
+        console.error('     Falling back to disk. VIRANI works, but it will forget');
+        console.error('     everything when the server restarts.');
+        console.error('');
+      }
+    } else {
+      this.backend = new FileBackend();
+    }
+    console.log(`[store] backend = ${this.backend.name}${this.degraded ? ' (degraded)' : ''}`);
   }
 
   get(key) {

@@ -15,6 +15,7 @@ const apps = require('./apps');
 const contacts = require('./contacts');
 const messaging = require('./messaging');
 const notes = require('./notes');
+const documents = require('./documents');
 const money = require('./money');
 const location = require('./location');
 const googleTools = require('./google');
@@ -26,6 +27,7 @@ const ALL = [
   ...knowledge.tools,
   ...reminders.tools,
   ...notes.tools,
+  ...documents.tools,
   ...money.tools,
   ...contacts.tools,
   ...messaging.tools,

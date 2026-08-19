@@ -215,14 +215,42 @@ async function main() {
     assert.ok(actions[0].url.includes('@24.8607,67.0011'), 'the map must be centred on the owner');
   });
 
-  // -- 13. Memory reaches the system prompt ---------------------------------
+  // -- 13. Documents are real, usable output --------------------------------
+  await check('a document is written and renders as a page', async () => {
+    script = [
+      [{ functionCall: { name: 'create_document', args: {
+        title: 'Test Proposal',
+        content: '## Scope\n- One\n- Two\n\n| Item | Cost |\n|---|---|\n| Design | 40,000 |',
+      } } }],
+      [{ text: 'Your proposal is ready.' }],
+    ];
+    const { actions } = await think({ systemPrompt: 'test', userMessage: 'write me a proposal' });
+    assert.strictEqual(actions.length, 1, 'the document should open for the owner');
+    assert.ok(actions[0].url.includes('/d/'), actions[0].url);
+
+    const id = actions[0].url.split('/d/')[1];
+    const { findById } = require('../src/tools/documents');
+    const doc = await findById(id);
+    assert.ok(doc, 'the document should be stored');
+
+    const { documentPage } = require('../src/core/render');
+    const html = documentPage(doc);
+    assert.ok(html.includes('<table>'), 'tables should render');
+    assert.ok(html.includes('Test Proposal'), 'the title should render');
+
+    // Document text must never become live markup.
+    const { markdownToHtml } = require('../src/core/render');
+    assert.ok(!markdownToHtml('<script>alert(1)</script>').includes('<script>'), 'must escape HTML');
+  });
+
+  // -- 14. Memory reaches the system prompt ---------------------------------
   await check('remembered facts appear in the system prompt', async () => {
     const prompt = await buildSystemPrompt({ profile: { name: 'Maaz' } });
     assert.ok(prompt.includes('strong coffee'), 'the saved fact should be injected');
     assert.ok(prompt.includes('Maaz'), 'the owner should be addressed by name');
   });
 
-  // -- 14. The HTTP API ----------------------------------------------------
+  // -- 15. The HTTP API ----------------------------------------------------
   global.fetch = realFetch;
   await check('the HTTP API authenticates and serves state', async () => {
     const { app } = require('../src/index');
@@ -259,7 +287,7 @@ async function main() {
       const state = await (
         await realFetch(`${base}/api/state`, { headers: { Authorization: `Bearer ${login.token}` } })
       ).json();
-      assert.ok(state.tools.length >= 31, `expected 31+ tools, got ${state.tools.length}`);
+      assert.ok(state.tools.length >= 35, `expected 35+ tools, got ${state.tools.length}`);
       assert.strictEqual(state.voice.premium, false, 'premium voice is off without a key');
       assert.strictEqual(state.contacts.length, 1, 'the saved contact should show');
 
