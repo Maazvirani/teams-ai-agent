@@ -61,22 +61,50 @@ permanently, even after the server restarts.
 
 ## Step 3 — The cloud (8 min)
 
-1. Open <https://www.back4app.com/signup-containers>
-2. Sign up — **Continue with GitHub** is easiest, since your code is on GitHub
-3. Once inside, click **Create new app** → choose **Containers as a Service**
-4. Click **Import from GitHub** and authorise Back4App to see your repositories
-   - If asked which repositories, choose **Only select repositories** and pick
-     `teams-ai-agent`
-5. Select the repository `teams-ai-agent`
-6. **Important — set the branch.** In the branch dropdown choose:
+**Go straight to the Containers dashboard**, not the main Back4App site. Back4App
+sells two different products and it is easy to land in the wrong one:
 
-   ```
-   claude/jarvis-ai-voice-agent-1xaoy5
-   ```
+> **<https://containers.back4app.com>**
 
-7. Leave the build settings alone. Back4App finds the `Dockerfile` in the
-   repository and uses it automatically.
-8. If it asks for a **port**, enter `7860`.
+Sign up there — **Continue with GitHub** is easiest, since your code is on GitHub.
+
+### Screen by screen
+
+The button you are looking for appears **one screen later** than you'd expect.
+"Import from GitHub" is not on the first screen — you have to choose Container
+and name the app first.
+
+**Screen 1 — the dashboard**
+Click **New App** (top right). Not "Create new app" — the button reads **New App**.
+
+**Screen 2 — pick the type**
+Choose **Container**. If you see two choices, the other one is *Backend as a
+Service*, which is Back4App's database product — **not** what you want. If you
+only ever see the database product, you are on the main `back4app.com` site
+rather than `containers.back4app.com`.
+
+Give the app a name: `virani`.
+
+**Screen 3 — connect the code**
+*Now* you will see **Import from GitHub**. Click it and authorise Back4App.
+
+- When GitHub asks which repositories, choose **Only select repositories**
+- Pick `teams-ai-agent`
+- Back on Back4App, select `teams-ai-agent` from the list
+
+**Screen 4 — configure**
+This screen has the app name, **branch**, root directory, auto-deploy and
+environment variables.
+
+- **Branch** — change it from `main` to:
+
+  ```
+  claude/jarvis-ai-voice-agent-1xaoy5
+  ```
+
+- **Root directory** — leave blank
+- Leave the build settings alone; Back4App finds the `Dockerfile` by itself
+- If it asks for a **port**, enter `7860`
 
 ### Now add the settings
 
