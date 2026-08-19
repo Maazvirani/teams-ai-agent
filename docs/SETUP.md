@@ -27,9 +27,13 @@ steps 5–8 make it a proper 24/7 one.
 > identical result — the only difference is that you type the settings in rather
 > than Render reading them from `render.yaml`.
 >
-> Use **Step 2B** below instead of Step 2A. It takes about three minutes longer.
-> If Render still insists on a card even for a manual Free web service, jump to
-> [`NO-CREDIT-CARD.md`](NO-CREDIT-CARD.md) for hosts that never ask for one.
+> Try **Step 2B** below instead of Step 2A. It takes about three minutes longer.
+>
+> **If Render demands billing even for a manual Free web service**, its card
+> checks vary by account and country — don't fight it. Go straight to
+> [`NO-CREDIT-CARD.md`](NO-CREDIT-CARD.md), which covers running VIRANI from
+> your own computer in ten minutes (no signup at all) and three hosts that
+> never ask for a card.
 
 ---
 

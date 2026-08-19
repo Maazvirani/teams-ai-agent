@@ -1,7 +1,7 @@
 {
   "name": "virani-ai",
   "version": "2.0.0",
-  "description": "V.I.R.A.N.I. — Virtual Intelligent Response Assistant & Network Interface. A real, cloud-hosted, 24/7 Jarvis-style voice assistant: talks, listens, searches the live web, sets reminders, remembers you, and controls Gmail & Google Calendar.",
+  "description": "V.I.R.A.N.I. \u2014 Virtual Intelligent Response Assistant & Network Interface. A real, cloud-hosted, 24/7 Jarvis-style voice assistant: talks, listens, searches the live web, sets reminders, remembers you, and controls Gmail & Google Calendar.",
   "main": "src/index.js",
   "engines": {
     "node": ">=18.0.0"
@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "keys": "node scripts/generate-keys.js"
+    "keys": "node scripts/generate-keys.js",
+    "tunnel": "node scripts/tunnel.js"
   },
   "dependencies": {
     "botbuilder": "^4.23.1",
