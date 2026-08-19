@@ -16,8 +16,8 @@ const { config } = require('./config');
 const { postJson } = require('./http');
 const tools = require('../tools');
 
-async function think({ systemPrompt, history = [], userMessage, channel = 'voice' }) {
-  const ctx = { actions: [], log: [], channel };
+async function think({ systemPrompt, history = [], userMessage, channel = 'voice', coords = null }) {
+  const ctx = { actions: [], log: [], channel, coords };
   const provider = config.aiProvider;
 
   const reply =

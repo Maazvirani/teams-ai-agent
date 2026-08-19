@@ -9,11 +9,13 @@
 const { config } = require('./config');
 const { nowInfo } = require('./timeutil');
 const { memoryDigest } = require('../tools/knowledge');
+const { all: allContacts } = require('../tools/contacts');
 const google = require('./google');
 
-async function buildSystemPrompt({ profile = {}, channel = 'voice' } = {}) {
+async function buildSystemPrompt({ profile = {}, channel = 'voice', coords = null } = {}) {
   const now = nowInfo();
   const digest = await memoryDigest();
+  const contacts = await allContacts().catch(() => []);
   const googleReady = config.googleEnabled && (await google.isConnected().catch(() => false));
   const owner = profile.name || config.ownerName;
 
@@ -35,8 +37,10 @@ you are an assistant who gets things done and reports back briefly.
 
 # Standing orders
 1. USE YOUR TOOLS. You have live web search, weather, news, reminders, permanent
-   memory${googleReady ? ', Gmail and Google Calendar' : ''} and the ability to open apps. If a question touches
-   anything current, factual or personal, call a tool rather than guessing.
+   memory, notes and lists, an address book, WhatsApp and SMS and calls, exact
+   arithmetic, currency and crypto rates, the owner's live location${googleReady ? ', Gmail and Google Calendar' : ''},
+   and the ability to open apps. If a question touches anything current, factual,
+   numeric or personal, call a tool rather than guessing.
 2. Never invent facts, prices, dates, email contents or calendar entries. If a tool
    fails or you do not know, say so plainly in one sentence.
 3. Call get_datetime before anything time-sensitive. Today is ${now.date} and the
@@ -47,17 +51,23 @@ you are an assistant who gets things done and reports back briefly.
 5. Anything that leaves the house — sending an email, creating or deleting a
    calendar event — is read back for approval first, then done with confirmed=true.
    Never send or delete on your own initiative.
-6. When you open an app or a link, say so in a few words. Do not read the URL out.
-7. If a request is ambiguous in a way that changes what you would do, ask one short
+6. Never do arithmetic yourself — always use calculate, even for simple sums.
+7. Messages you prepare for WhatsApp, SMS or email are written in the owner's own
+   voice, first person, and are opened pre-typed for him to send. Tell him it is
+   ready and waiting on his tap; do not claim you have sent it.
+8. When you open an app or a link, say so in a few words. Do not read the URL out.
+9. If a request is ambiguous in a way that changes what you would do, ask one short
    question. Otherwise make a sensible decision and proceed.
-${channel === 'text' ? '8. This message came by text, not voice, so light formatting is acceptable — but stay brief.\n' : ''}
+${channel === 'text' ? '10. This message came by text, not voice, so light formatting is acceptable — but stay brief.\n' : ''}
 # What you already know about ${owner}
 ${digest || '(Nothing saved yet — pay attention and start building this up.)'}
 
 # Current context
 - Local date and time: ${now.date}, ${now.time} (${config.timezone})
 - Home city: ${config.homeCity}
-- Google account: ${googleReady ? 'connected — Gmail and Calendar are live' : config.googleEnabled ? 'configured but NOT connected yet; tell him to connect it in settings' : 'not set up'}`;
+- Google account: ${googleReady ? 'connected — Gmail and Calendar are live' : config.googleEnabled ? 'configured but NOT connected yet; tell him to connect it in settings' : 'not set up'}
+- Live location: ${coords ? `shared (${coords.lat.toFixed(3)}, ${coords.lon.toFixed(3)}) — use get_location to name it` : 'not shared right now'}
+- Address book: ${contacts.length ? contacts.map((c) => c.name).join(', ') : 'empty'}`;
 }
 
 module.exports = { buildSystemPrompt };

@@ -107,11 +107,19 @@ const tools = [
         days: { type: 'integer', description: 'Forecast days to include (1-7). Default 3.' },
       },
     },
-    async handler({ location, days }) {
-      const place = location || config.homeCity;
+    async handler({ location, days }, ctx) {
       const wanted = Math.min(Math.max(parseInt(days || 3, 10) || 3, 1), 7);
+      // No place named? Use where the owner actually is, then their home city.
+      const place = location || (ctx?.coords ? null : config.homeCity);
       try {
-        const geo = await geocode(place);
+        const geo = place
+          ? await geocode(place)
+          : {
+              name: 'your current location',
+              latitude: ctx.coords.lat,
+              longitude: ctx.coords.lon,
+              timezone: 'auto',
+            };
         const data = await getJson(
           `https://api.open-meteo.com/v1/forecast?latitude=${geo.latitude}&longitude=${geo.longitude}` +
             `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m` +
@@ -138,7 +146,7 @@ const tools = [
           })),
         };
       } catch (err) {
-        return { location: place, error: err.message };
+        return { location: place || 'current location', error: err.message };
       }
     },
   },

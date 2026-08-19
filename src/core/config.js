@@ -64,6 +64,23 @@ const config = {
     ],
   },
 
+  // --- Voice -------------------------------------------------------------
+  // "browser" (default, free) uses the speech engine on your device.
+  // "elevenlabs" synthesises on the server for a far more natural voice.
+  tts: {
+    provider: (process.env.TTS_PROVIDER || 'browser').toLowerCase(),
+    apiKey: process.env.ELEVENLABS_API_KEY || '',
+    // Default is ElevenLabs' "Adam" — deep and calm. Any voice id works:
+    // https://elevenlabs.io/app/voice-library
+    voiceId: process.env.ELEVENLABS_VOICE_ID || 'pNInz6obpgDQGcFmaJgB',
+    model: process.env.ELEVENLABS_MODEL || 'eleven_turbo_v2_5',
+    stability: Number(process.env.ELEVENLABS_STABILITY || 0.45),
+    similarity: Number(process.env.ELEVENLABS_SIMILARITY || 0.8),
+    speed: Number(process.env.ELEVENLABS_SPEED || 1),
+    // A hard ceiling so one long answer cannot eat the free character quota.
+    maxChars: parseInt(process.env.TTS_MAX_CHARS || '900', 10),
+  },
+
   // --- Push notifications (free, no service required) --------------------
   vapid: {
     publicKey: process.env.VAPID_PUBLIC_KEY || '',

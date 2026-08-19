@@ -78,11 +78,25 @@
       <h3>Voice</h3>
       <label class="row"><span>Speak replies</span>
         <input type="checkbox" id="speakToggle" checked></label>
+      <label class="row" id="premiumRow" hidden><span>Cinematic voice</span>
+        <input type="checkbox" id="premiumToggle" checked></label>
       <label class="row"><span>Voice</span>
         <select id="voiceSelect"></select></label>
       <label class="row"><span>Speed</span>
         <input type="range" id="rate" min="0.7" max="1.4" step="0.05" value="1"></label>
       <button id="testVoice" class="ghost">Test voice</button>
+      <p id="voiceState" class="hint"></p>
+    </section>
+
+    <section>
+      <h3>Awareness</h3>
+      <label class="row"><span>Use my location</span>
+        <input type="checkbox" id="locationToggle"></label>
+      <p class="hint">Lets "what's the weather" and "find a pharmacy near me" mean
+        <em>here</em>. Coordinates are sent with your message and never stored.</p>
+      <label class="row"><span>Keep screen awake while listening</span>
+        <input type="checkbox" id="wakeLockToggle" checked></label>
+      <p id="locationState" class="hint"></p>
     </section>
 
     <section>
@@ -104,6 +118,12 @@
     <section>
       <h3>Reminders</h3>
       <ul id="reminderList" class="list"></ul>
+    </section>
+
+    <section>
+      <h3>Contacts</h3>
+      <p class="hint">Say "save Ali's number as 0328…" and he becomes callable by name.</p>
+      <ul id="contactList" class="list"></ul>
     </section>
 
     <section>

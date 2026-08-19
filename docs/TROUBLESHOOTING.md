@@ -49,6 +49,45 @@ The list only shows what your device has.
 **No voices in the list at all.**
 Some devices load them late — close and reopen the app once.
 
+**The cinematic voice isn't being used.**
+Check ⚙ Settings → Voice. If there is no **Cinematic voice** switch, the server
+has no key — set `TTS_PROVIDER=elevenlabs` and `ELEVENLABS_API_KEY` in Render.
+If the switch is there but the line underneath reports an error, that error is
+the real cause (usually a spent quota or a wrong key). It falls back to the
+device voice on purpose rather than going silent.
+
+**"ElevenLabs error (401)".**
+The key is wrong. Make a new one in your ElevenLabs profile.
+
+**"ElevenLabs error (429)" or quota messages.**
+You have used the month's free characters. Either wait for the reset, or set
+`TTS_PROVIDER=browser` to go back to the free voice. Lower `TTS_MAX_CHARS` to
+make the quota last longer.
+
+---
+
+## Contacts, messages and location
+
+**"No contact called X."**
+Save them first: *"Virani, save Ali's number as 0328 263 2052."* You can see and
+delete everyone in ⚙ Settings → Contacts.
+
+**WhatsApp opens but the message is empty.**
+The WhatsApp app sometimes ignores pre-filled text when it opens cold. Open
+WhatsApp once first, then ask again.
+
+**It says the message is ready but never sends it.**
+That is deliberate — VIRANI writes the message and opens the app, and *you*
+press send. It will never send a message under your name on its own.
+
+**"Location is not shared."**
+⚙ Settings → Awareness → **Use my location**, and allow the browser prompt.
+Location also needs an https address, which your Render URL already is.
+
+**The phone locks while I'm talking to it.**
+⚙ Settings → Awareness → **Keep screen awake while listening**. Some browsers
+do not support it; there the screen still dims on its own.
+
 ---
 
 ## Reminders and notifications
@@ -150,5 +189,5 @@ network or spending any quota:
 node scripts/selftest.js
 ```
 
-If those ten pass, the code is sound and the problem is configuration: check
-`/health` and the Render environment variables.
+If those fourteen pass, the code is sound and the problem is configuration:
+check `/health` and the Render environment variables.

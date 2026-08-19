@@ -20,8 +20,10 @@ const { think } = require('./core/brain');
 const { buildSystemPrompt } = require('./core/persona');
 const toolRegistry = require('./tools');
 const { icon } = require('./core/icon');
+const voice = require('./core/voice');
 const { KEY: REMINDERS_KEY, render: renderReminder, activeReminders } = require('./tools/reminders');
 const { allFacts } = require('./tools/knowledge');
+const { all: allContacts } = require('./tools/contacts');
 
 const app = express();
 app.disable('x-powered-by');
@@ -79,9 +81,10 @@ app.post('/api/login', (req, res) => {
 
 app.get('/api/state', auth.requireAuth, async (req, res) => {
   try {
-    const [reminders, facts, devices, googleConnected, tokens, inbox] = await Promise.all([
+    const [reminders, facts, contacts, devices, googleConnected, tokens, inbox] = await Promise.all([
       activeReminders(),
       allFacts(),
+      allContacts(),
       push.count(),
       config.googleEnabled ? google.isConnected() : Promise.resolve(false),
       config.googleEnabled ? google.getTokens() : Promise.resolve(null),
@@ -105,6 +108,8 @@ app.get('/api/state', auth.requireAuth, async (req, res) => {
         .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
         .map(renderReminder),
       facts: facts.map((f) => ({ id: f.id, category: f.category, fact: f.text })),
+      contacts: contacts.map((c) => ({ id: c.id, name: c.name, phone: c.phone, email: c.email })),
+      voice: { premium: voice.available() },
       inbox,
       tools: toolRegistry.names(),
     });
@@ -119,18 +124,20 @@ app.post('/api/chat', auth.requireAuth, async (req, res) => {
   const message = String(req.body?.message || '').trim();
   const channel = req.body?.channel === 'text' ? 'text' : 'voice';
   const userId = req.user?.sub || 'owner';
+  const coords = readCoords(req.body?.coords);
 
   if (!message) return res.status(400).json({ error: 'Say something first.' });
 
   try {
     const record = await store.getConversation(userId);
-    const systemPrompt = await buildSystemPrompt({ profile: record.profile, channel });
+    const systemPrompt = await buildSystemPrompt({ profile: record.profile, channel, coords });
 
     const { reply, actions, toolLog } = await think({
       systemPrompt,
       history: record.turns.map((t) => ({ role: t.role, text: t.text })),
       userMessage: message,
       channel,
+      coords,
     });
 
     await store.addTurn(userId, 'user', message);
@@ -140,6 +147,27 @@ app.post('/api/chat', auth.requireAuth, async (req, res) => {
   } catch (err) {
     console.error('[chat]', err.message);
     res.status(500).json({ error: err.message });
+  }
+});
+
+/** Accept coordinates only when they are real numbers in range. */
+function readCoords(raw) {
+  const lat = Number(raw?.lat);
+  const lon = Number(raw?.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  if (Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  return { lat, lon, accuracy: Number(raw.accuracy) || undefined };
+}
+
+/** Premium text-to-speech. The browser falls back to its own voice on failure. */
+app.post('/api/speak', auth.requireAuth, async (req, res) => {
+  if (!voice.available()) return res.status(503).json({ error: 'Premium voice is not configured.' });
+  try {
+    const audio = await voice.synthesize(req.body?.text);
+    res.set('Content-Type', 'audio/mpeg').set('Cache-Control', 'no-store').send(audio);
+  } catch (err) {
+    console.error('[voice]', err.message);
+    res.status(502).json({ error: err.message });
   }
 });
 
@@ -157,6 +185,11 @@ app.delete('/api/reminders/:id', auth.requireAuth, async (req, res) => {
 app.delete('/api/facts/:id', auth.requireAuth, async (req, res) => {
   const removed = await store.remove('facts', req.params.id);
   res.json(removed ? { deleted: removed.text } : { error: 'Not found.' });
+});
+
+app.delete('/api/contacts/:id', auth.requireAuth, async (req, res) => {
+  const removed = await store.remove('contacts', req.params.id);
+  res.json(removed ? { deleted: removed.name } : { error: 'Not found.' });
 });
 
 // --- Push notifications ----------------------------------------------------
@@ -272,6 +305,7 @@ async function start() {
     console.log(`  Memory      : ${config.memoryBackend}`);
     console.log(`  Timezone    : ${config.timezone}`);
     console.log(`  Tools       : ${toolRegistry.names().length} — ${toolRegistry.names().join(', ')}`);
+    console.log(`  Voice       : ${voice.available() ? `elevenlabs (${config.tts.voiceId})` : 'browser (free)'}`);
     console.log(`  Google      : ${config.googleEnabled ? 'configured' : 'not configured'}`);
     console.log(`  Teams       : ${config.teamsEnabled ? 'enabled at /api/messages' : 'off'}`);
     if (!config.ownerPin) console.log('  ⚠  OWNER_PIN is not set — the app will refuse to sign anyone in.');

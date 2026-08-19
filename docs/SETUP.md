@@ -146,6 +146,40 @@ VIRANI is now genuinely always on.
 
 ---
 
+## Step 9 — The cinematic voice (3 min, optional)
+
+The free device voice is fine. This one sounds like the film.
+
+1. Sign up at <https://elevenlabs.io> (free tier: ~10,000 characters a month —
+   roughly 150 spoken replies)
+2. Profile menu → **API Keys** → create one and copy it
+3. Optional: browse the **Voice Library**, pick a voice you like, and copy its
+   **Voice ID**. The default is *Adam* — deep and calm.
+4. Render → **Environment**:
+   - `TTS_PROVIDER` → `elevenlabs`
+   - `ELEVENLABS_API_KEY` → your key
+   - `ELEVENLABS_VOICE_ID` → the voice id (skip to keep Adam)
+5. **Save changes**. In VIRANI → ⚙ Settings → **Voice**, a **Cinematic voice**
+   switch now appears.
+
+If the quota runs out or the key stops working, VIRANI silently drops back to
+your device's voice — it never goes mute.
+
+---
+
+## Step 10 — Location awareness (30 seconds, optional)
+
+⚙ Settings → **Awareness** → **Use my location** → allow the browser prompt.
+
+Now *"what's the weather"* means where you actually are, and *"find a pharmacy
+near me"* opens the map centred on you. Coordinates are sent with the message
+and never stored.
+
+**Keep screen awake while listening** is on by default — without it the phone
+locks mid-conversation and stops hearing you.
+
+---
+
 ## Optional extras
 
 **A spoken morning briefing.** Either say *"Virani, brief me every morning at
@@ -169,7 +203,7 @@ The Teams app package is in `appPackage/`.
 ## Checking it yourself
 
 Open `https://YOUR-URL.onrender.com/health` in a browser. You should see the
-assistant name, the AI provider, and how many tools loaded (13 without Google,
-19 with it).
+assistant name, the AI provider, and how many tools loaded (31 without Google,
+37 with it).
 
 Something not working? → [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)

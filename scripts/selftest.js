@@ -157,14 +157,72 @@ async function main() {
     assert.ok(/one piece at a time/.test(reply), 'it should give up gracefully');
   });
 
-  // -- 9. Memory reaches the system prompt ---------------------------------
+  // -- 9. Arithmetic goes through the parser, not the model -----------------
+  await check('the calculator returns exact answers', async () => {
+    script = [
+      [{ functionCall: { name: 'calculate', args: { expression: '(2400 * 0.175) / 3' } } }],
+      [{ text: 'One hundred and forty.' }],
+    ];
+    const { toolLog } = await think({ systemPrompt: 'test', userMessage: 'split 17.5% of 2400 three ways' });
+    assert.deepStrictEqual(toolLog.map((t) => t.tool), ['calculate']);
+
+    const { evaluate } = require('../src/tools/money');
+    assert.strictEqual(evaluate('(2400 * 0.175) / 3'), 140);
+    assert.throws(() => evaluate('process.exit(1)'), 'code must never evaluate');
+  });
+
+  // -- 10. Contacts drive messaging ----------------------------------------
+  await check('a contact can be saved then messaged by name', async () => {
+    script = [
+      [{ functionCall: { name: 'save_contact', args: { name: 'Ali Raza', phone: '+92 328 263 2052' } } }],
+      [{ text: 'Saved.' }],
+    ];
+    await think({ systemPrompt: 'test', userMessage: "save Ali's number" });
+
+    script = [
+      [{ functionCall: { name: 'send_whatsapp', args: { to: 'ali', message: 'Running late' } } }],
+      [{ text: 'Ready to send.' }],
+    ];
+    const { actions } = await think({ systemPrompt: 'test', userMessage: 'whatsapp ali that I am running late' });
+    assert.strictEqual(actions.length, 1);
+    assert.ok(actions[0].url.startsWith('https://wa.me/923282632052?text='), actions[0].url);
+    assert.ok(actions[0].url.includes('Running%20late'), 'the message must be pre-filled');
+  });
+
+  // -- 11. Lists -----------------------------------------------------------
+  await check('lists survive across turns', async () => {
+    script = [
+      [{ functionCall: { name: 'add_to_list', args: { list: 'shopping', items: ['milk', 'eggs'] } } }],
+      [{ text: 'Added.' }],
+    ];
+    await think({ systemPrompt: 'test', userMessage: 'add milk and eggs to my shopping list' });
+
+    const { getLists } = require('../src/tools/notes');
+    assert.deepStrictEqual((await getLists()).shopping, ['milk', 'eggs']);
+  });
+
+  // -- 12. Live location reaches the tools ---------------------------------
+  await check('live coordinates are passed through to tools', async () => {
+    script = [
+      [{ functionCall: { name: 'find_nearby', args: { query: 'pharmacy' } } }],
+      [{ text: 'Map is up.' }],
+    ];
+    const { actions } = await think({
+      systemPrompt: 'test',
+      userMessage: 'find a pharmacy near me',
+      coords: { lat: 24.8607, lon: 67.0011 },
+    });
+    assert.ok(actions[0].url.includes('@24.8607,67.0011'), 'the map must be centred on the owner');
+  });
+
+  // -- 13. Memory reaches the system prompt ---------------------------------
   await check('remembered facts appear in the system prompt', async () => {
     const prompt = await buildSystemPrompt({ profile: { name: 'Maaz' } });
     assert.ok(prompt.includes('strong coffee'), 'the saved fact should be injected');
     assert.ok(prompt.includes('Maaz'), 'the owner should be addressed by name');
   });
 
-  // -- 10. The HTTP API ----------------------------------------------------
+  // -- 14. The HTTP API ----------------------------------------------------
   global.fetch = realFetch;
   await check('the HTTP API authenticates and serves state', async () => {
     const { app } = require('../src/index');
@@ -201,7 +259,16 @@ async function main() {
       const state = await (
         await realFetch(`${base}/api/state`, { headers: { Authorization: `Bearer ${login.token}` } })
       ).json();
-      assert.ok(state.tools.length >= 13, 'tools should be listed');
+      assert.ok(state.tools.length >= 31, `expected 31+ tools, got ${state.tools.length}`);
+      assert.strictEqual(state.voice.premium, false, 'premium voice is off without a key');
+      assert.strictEqual(state.contacts.length, 1, 'the saved contact should show');
+
+      const speak = await realFetch(`${base}/api/speak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${login.token}` },
+        body: JSON.stringify({ text: 'hello' }),
+      });
+      assert.strictEqual(speak.status, 503, 'premium speech should decline cleanly when unconfigured');
       assert.strictEqual(state.reminders.length, 1, 'the reminder from earlier should show');
       assert.ok(state.pushPublicKey, 'a push key should be published');
 

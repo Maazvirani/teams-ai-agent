@@ -12,6 +12,11 @@ const world = require('./world');
 const reminders = require('./reminders');
 const knowledge = require('./knowledge');
 const apps = require('./apps');
+const contacts = require('./contacts');
+const messaging = require('./messaging');
+const notes = require('./notes');
+const money = require('./money');
+const location = require('./location');
 const googleTools = require('./google');
 const { config } = require('../core/config');
 
@@ -20,6 +25,11 @@ const ALL = [
   ...search.tools,
   ...knowledge.tools,
   ...reminders.tools,
+  ...notes.tools,
+  ...money.tools,
+  ...contacts.tools,
+  ...messaging.tools,
+  ...location.tools,
   ...apps.tools,
   // Gmail/Calendar are only offered to the model when Google is configured,
   // otherwise it would keep suggesting things it cannot do.

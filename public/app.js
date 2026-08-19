@@ -24,6 +24,9 @@ const S = {
 function loadPrefs() {
   const defaults = {
     speak: true,
+    premium: true,       // use the server's cinematic voice when it is available
+    location: false,     // opt in — nothing is sent until you switch it on
+    wakeLock: true,      // hold the screen on while listening
     voiceURI: '',
     rate: 1,
     wake: false,
@@ -51,6 +54,9 @@ const el = {
   wakeToggle: $('wakeToggle'), onlineDot: $('onlineDot'),
   settings: $('settings'), settingsBtn: $('settingsBtn'), closeSettings: $('closeSettings'), scrim: $('scrim'),
   speakToggle: $('speakToggle'), voiceSelect: $('voiceSelect'), rate: $('rate'), testVoice: $('testVoice'),
+  premiumRow: $('premiumRow'), premiumToggle: $('premiumToggle'), voiceState: $('voiceState'),
+  locationToggle: $('locationToggle'), wakeLockToggle: $('wakeLockToggle'), locationState: $('locationState'),
+  contactList: $('contactList'),
   enablePush: $('enablePush'), testPush: $('testPush'), pushState: $('pushState'),
   googleSection: $('googleSection'), googleState: $('googleState'),
   googleConnect: $('googleConnect'), googleDisconnect: $('googleDisconnect'),
@@ -110,6 +116,7 @@ async function enterApp() {
   el.app.classList.remove('hidden');
   await refreshState();
   registerServiceWorker();
+  if (S.prefs.location) refreshCoords().catch(() => {});
   greet();
 }
 
@@ -183,7 +190,11 @@ async function send(message, { spoken = false } = {}) {
   try {
     const data = await api('/api/chat', {
       method: 'POST',
-      body: JSON.stringify({ message: text, channel: spoken ? 'voice' : 'text' }),
+      body: JSON.stringify({
+        message: text,
+        channel: spoken ? 'voice' : 'text',
+        coords: freshCoords(),
+      }),
     });
 
     const links = [];
@@ -259,6 +270,62 @@ function pickJarvisVoice() {
 
 function speak(text) {
   if (!S.prefs.speak || !text) return;
+  stopSpeaking();
+
+  if (S.premiumAvailable && S.prefs.premium) {
+    speakPremium(text).catch((err) => {
+      // Quota gone, network blip, bad key — never go silent, just drop back.
+      console.warn('[voice] premium failed, using the browser voice:', err.message);
+      el.voiceState.textContent = `Cinematic voice unavailable (${err.message}) — using the device voice.`;
+      speakLocally(text);
+    });
+    return;
+  }
+  speakLocally(text);
+}
+
+/** Server-synthesised speech (ElevenLabs), played as one audio clip. */
+async function speakPremium(text) {
+  const res = await fetch('/api/speak', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${S.token}` },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail.error || `HTTP ${res.status}`);
+  }
+
+  const url = URL.createObjectURL(await res.blob());
+  const audio = new Audio(url);
+  S.audio = audio;
+
+  audio.onplay = () => {
+    setState('speaking', 'Speaking');
+    suspendListening();
+  };
+  const finish = () => {
+    URL.revokeObjectURL(url);
+    S.audio = null;
+    setState('', 'Ready');
+    resumeListening();
+  };
+  audio.onended = finish;
+  audio.onerror = finish;
+
+  await audio.play();
+}
+
+/** Stop whichever engine is currently talking. */
+function stopSpeaking() {
+  speechSynthesis.cancel();
+  if (S.audio) {
+    S.audio.pause();
+    S.audio = null;
+  }
+}
+
+function speakLocally(text) {
   speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(String(text).replace(/[*_`#]/g, ''));
@@ -387,6 +454,7 @@ function startListening(mode) {
   S.awaitingCommand = false;
   startRecognition();
   startMeter();
+  requestWakeLock();
   updateMicUi();
   setState('listening', mode === 'wake' ? `Standing by for "${S.wakeWord}"` : 'Listening');
 }
@@ -399,6 +467,7 @@ function stopListening() {
     recognition?.stop();
   } catch (_) { /* not running */ }
   stopMeter();
+  releaseWakeLock();
   updateMicUi();
   el.interim.textContent = '';
   setState('', 'Ready');
@@ -528,12 +597,69 @@ el.scrim.addEventListener('click', closeSettings);
 
 function applyPrefsToUi() {
   el.speakToggle.checked = S.prefs.speak;
+  el.premiumToggle.checked = S.prefs.premium;
+  el.locationToggle.checked = S.prefs.location;
+  el.wakeLockToggle.checked = S.prefs.wakeLock;
   el.rate.value = S.prefs.rate;
+}
+
+// ── Location ─────────────────────────────────────────────────────────────
+/** Coordinates are only attached to a message if they are recent. */
+function freshCoords() {
+  if (!S.prefs.location || !S.coords) return undefined;
+  if (Date.now() - S.coords.at > 5 * 60 * 1000) {
+    refreshCoords().catch(() => {});          // refresh in the background
+  }
+  return { lat: S.coords.lat, lon: S.coords.lon, accuracy: S.coords.accuracy };
+}
+
+function refreshCoords() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      el.locationState.textContent = 'This device has no location support.';
+      reject(new Error('no geolocation'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        S.coords = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          accuracy: Math.round(position.coords.accuracy),
+          at: Date.now(),
+        };
+        el.locationState.textContent = `Location on, accurate to about ${S.coords.accuracy} metres.`;
+        resolve(S.coords);
+      },
+      (err) => {
+        el.locationState.textContent = `Location unavailable: ${err.message}`;
+        reject(err);
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 }
+    );
+  });
+}
+
+// ── Screen wake lock ─────────────────────────────────────────────────────
+// Hands-free only works if the phone does not lock itself mid-sentence.
+async function requestWakeLock() {
+  if (!S.prefs.wakeLock || !('wakeLock' in navigator) || S.wakeLock) return;
+  try {
+    S.wakeLock = await navigator.wakeLock.request('screen');
+    S.wakeLock.addEventListener('release', () => { S.wakeLock = null; });
+  } catch (_) {
+    /* denied or unsupported — listening still works, the screen just sleeps */
+  }
+}
+
+function releaseWakeLock() {
+  S.wakeLock?.release().catch(() => {});
+  S.wakeLock = null;
 }
 
 el.speakToggle.addEventListener('change', () => {
   S.prefs.speak = el.speakToggle.checked;
-  if (!S.prefs.speak) speechSynthesis.cancel();
+  if (!S.prefs.speak) stopSpeaking();
   savePrefs();
 });
 el.voiceSelect.addEventListener('change', () => {
@@ -551,6 +677,28 @@ el.testVoice.addEventListener('click', () => {
   S.prefs.speak = previous;
 });
 
+el.premiumToggle.addEventListener('change', () => {
+  S.prefs.premium = el.premiumToggle.checked;
+  savePrefs();
+});
+
+el.locationToggle.addEventListener('change', async () => {
+  S.prefs.location = el.locationToggle.checked;
+  savePrefs();
+  if (S.prefs.location) await refreshCoords();
+  else {
+    S.coords = null;
+    el.locationState.textContent = 'Location off.';
+  }
+});
+
+el.wakeLockToggle.addEventListener('change', () => {
+  S.prefs.wakeLock = el.wakeLockToggle.checked;
+  savePrefs();
+  if (!S.prefs.wakeLock) releaseWakeLock();
+  else if (S.micMode !== 'off') requestWakeLock();
+});
+
 el.clearChat.addEventListener('click', async () => {
   await api('/api/reset', { method: 'POST' });
   el.log.innerHTML = '';
@@ -565,6 +713,14 @@ async function refreshState() {
   S.name = state.name;
   S.wakeWord = (state.wakeWord || 'virani').toLowerCase();
   S.pushKey = state.pushPublicKey;
+  S.premiumAvailable = Boolean(state.voice?.premium);
+
+  el.premiumRow.hidden = !S.premiumAvailable;
+  if (S.premiumAvailable) {
+    el.voiceState.textContent = 'Cinematic voice is available on this server.';
+  } else {
+    el.voiceState.textContent = 'Using your device voice. Add an ElevenLabs key for the cinematic one.';
+  }
 
   el.sysInfo.textContent =
     `Brain: ${state.aiProvider} · Timezone: ${state.timezone} · ` +
@@ -592,6 +748,30 @@ async function refreshState() {
     });
     li.append(body, del);
     el.reminderList.appendChild(li);
+  }
+
+  // Contacts
+  el.contactList.innerHTML = '';
+  if (!state.contacts || state.contacts.length === 0) {
+    el.contactList.innerHTML = '<li class="empty">No contacts saved</li>';
+  }
+  for (const contact of state.contacts || []) {
+    const li = document.createElement('li');
+    const body = document.createElement('div');
+    body.textContent = contact.name;
+    const detail = document.createElement('span');
+    detail.className = 'when';
+    detail.textContent = [contact.phone, contact.email].filter(Boolean).join(' · ') || 'no details';
+    body.appendChild(detail);
+
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.addEventListener('click', async () => {
+      await api(`/api/contacts/${contact.id}`, { method: 'DELETE' });
+      refreshState();
+    });
+    li.append(body, del);
+    el.contactList.appendChild(li);
   }
 
   // Long-term memory
@@ -725,11 +905,15 @@ function urlBase64ToUint8Array(base64String) {
 
 // ── Housekeeping ─────────────────────────────────────────────────────────
 document.addEventListener('visibilitychange', () => {
-  // Mobile browsers suspend recognition in the background; pick it back up.
-  if (!document.hidden && S.micMode !== 'off' && !S.paused) startRecognition();
+  // Mobile browsers suspend recognition — and drop the wake lock — in the
+  // background, so both are re-established when the app comes back.
+  if (document.hidden || S.micMode === 'off') return;
+  if (!S.paused) startRecognition();
+  requestWakeLock();
 });
 
 window.addEventListener('beforeunload', () => {
-  speechSynthesis.cancel();
+  stopSpeaking();
   stopMeter();
+  releaseWakeLock();
 });
