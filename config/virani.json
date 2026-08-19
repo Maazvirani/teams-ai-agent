@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "Your settings, kept in the repository so you never retype them in a hosting",
+    "dashboard. Anything here can still be overridden by an environment variable",
+    "of the same name, but you should not need to.",
+    "",
+    "Secrets do NOT belong in this file — it is committed to git. The only things",
+    "you set in your host are OWNER_PIN, GEMINI_API_KEY and the two Upstash values."
+  ],
+
+  "ASSISTANT_NAME": "VIRANI",
+  "ASSISTANT_FULL_NAME": "Virtual Intelligent Response Assistant & Network Interface",
+  "WAKE_WORD": "virani",
+
+  "OWNER_NAME": "Maaz",
+  "OWNER_TIMEZONE": "Asia/Karachi",
+  "OWNER_CITY": "Karachi",
+  "OWNER_LOCALE": "en-GB",
+
+  "AI_PROVIDER": "gemini",
+  "GEMINI_MODEL": "gemini-2.0-flash",
+
+  "MEMORY_BACKEND": "upstash",
+  "MEMORY_TURNS": "20",
+
+  "TTS_PROVIDER": "browser",
+  "DAILY_BRIEFING_TIME": ""
+}

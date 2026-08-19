@@ -30,6 +30,13 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '1mb' }));
 app.set('trust proxy', 1);
 
+// Learn our own public address from real traffic, so PUBLIC_URL is optional.
+app.use((req, _res, next) => {
+  const host = req.get('x-forwarded-host') || req.get('host');
+  if (host) google.rememberOrigin(`${req.protocol}://${host}`);
+  next();
+});
+
 // ---------------------------------------------------------------------------
 // Public endpoints
 // ---------------------------------------------------------------------------
@@ -297,6 +304,7 @@ app.use((req, res) => {
 // Boot
 // ---------------------------------------------------------------------------
 async function start() {
+  await auth.initSecret();
   await push.init();
   scheduler.start();
 
@@ -309,6 +317,7 @@ async function start() {
     console.log(`  AI brain    : ${config.aiProvider} (${config[config.aiProvider]?.model || 'n/a'})`);
     console.log(`  Memory      : ${config.memoryBackend}`);
     console.log(`  Timezone    : ${config.timezone}`);
+    console.log(`  Public URL  : ${config.publicUrl || '(detected from traffic)'}`);
     console.log(`  Tools       : ${toolRegistry.names().length} — ${toolRegistry.names().join(', ')}`);
     console.log(`  Voice       : ${voice.available() ? `elevenlabs (${config.tts.voiceId})` : 'browser (free)'}`);
     console.log(`  Google      : ${config.googleEnabled ? 'configured' : 'not configured'}`);

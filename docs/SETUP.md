@@ -127,23 +127,22 @@ environment variables.
 
 ### Now add the settings
 
-Find the **Environment Variables** section on the same page and add each of
-these as a separate Name / Value pair:
+Find **Environment Variables** on that same screen. **You only need four** —
+everything else (your name, timezone, city, wake word, which memory to use) is
+already committed in `config/virani.json`, so there is nothing else to type.
 
 | Name | Value |
 |---|---|
 | `OWNER_PIN` | Any number you'll remember — this is your password |
 | `GEMINI_API_KEY` | The `AIza…` key from Step 1 |
-| `SESSION_SECRET` | Any long random string you make up |
-| `MEMORY_BACKEND` | `upstash` |
-| `UPSTASH_REDIS_REST_URL` | From Step 2 |
-| `UPSTASH_REDIS_REST_TOKEN` | From Step 2 |
-| `OWNER_NAME` | Maaz |
-| `OWNER_TIMEZONE` | `Asia/Karachi` |
-| `OWNER_CITY` | Karachi |
-| `WAKE_WORD` | `virani` |
+| `UPSTASH_REDIS_REST_URL` | From Step 2 — the address only |
+| `UPSTASH_REDIS_REST_TOKEN` | From Step 2 — the token only |
 
 Then click **Deploy**. The first build takes three to five minutes.
+
+> **Want to change your name, city or wake word later?** Edit
+> `config/virani.json` in GitHub — click the pencil icon, change the text, commit.
+> Back4App rebuilds automatically. No dashboard fiddling.
 
 > **Your PIN is your password.** VIRANI can read your email and calendar once
 > you connect Google, so anyone with this PIN has that access too. Don't use 1234.

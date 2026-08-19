@@ -13,11 +13,29 @@
 const crypto = require('crypto');
 const { config } = require('./config');
 
-// If no SESSION_SECRET was provided, derive a stable-per-boot one. Tokens then
-// stop working after a restart, which is safe but annoying — SETUP tells you
-// to set SESSION_SECRET so sessions survive redeploys.
-const SECRET =
-  config.sessionSecret || crypto.randomBytes(32).toString('hex');
+// The signing key for session tokens.
+//
+// If SESSION_SECRET is set, that wins. Otherwise one is generated once and kept
+// in the store, so it survives restarts and redeploys and you stay signed in —
+// without having to invent and paste a random string during setup.
+let SECRET = config.sessionSecret || crypto.randomBytes(32).toString('hex');
+
+async function initSecret() {
+  if (config.sessionSecret) return;
+
+  // Required here rather than at the top: the store reads config, and config
+  // must finish loading before auth is wired up.
+  // eslint-disable-next-line global-require
+  const { store } = require('./store');
+
+  const saved = await store.get('auth:secret');
+  if (saved && typeof saved === 'string' && saved.length >= 32) {
+    SECRET = saved;
+    return;
+  }
+  await store.set('auth:secret', SECRET);
+  console.log('[auth] Generated a session secret and saved it — you will stay signed in across restarts.');
+}
 
 function sign(payload) {
   const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
@@ -80,4 +98,4 @@ function requireAuth(req, res, next) {
   return next();
 }
 
-module.exports = { sign, verify, checkPin, issueToken, requireAuth };
+module.exports = { sign, verify, checkPin, issueToken, requireAuth, initSecret };

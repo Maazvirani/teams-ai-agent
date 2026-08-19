@@ -8,8 +8,30 @@
 
 require('dotenv').config();
 
+const fs = require('fs');
+const path = require('path');
+
 /**
- * Read one environment variable, forgivingly.
+ * Settings committed alongside the code, so they never have to be retyped into
+ * a hosting dashboard. Environment variables still win, and secrets never live
+ * here — this file is in git.
+ */
+const fileSettings = (() => {
+  try {
+    const raw = fs.readFileSync(path.join(process.cwd(), 'config', 'virani.json'), 'utf8');
+    const parsed = JSON.parse(raw);
+    delete parsed._comment;
+    return parsed;
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.warn('[config] config/virani.json could not be read:', err.message);
+    }
+    return {};
+  }
+})();
+
+/**
+ * Read one setting, forgivingly.
  *
  * Hosting dashboards and the "copy" buttons on services like Upstash hand you a
  * whole .env line — `NAME="value"` — and it is very easy to paste that entire
@@ -18,7 +40,11 @@ require('dotenv').config();
  * Rather than make people debug that, we strip it here.
  */
 function env(name, fallback = '') {
+  // Environment first, then the committed settings file, then the default.
   let value = process.env[name];
+  if (value === undefined || value === null || String(value).trim() === '') {
+    value = fileSettings[name];
+  }
   if (value === undefined || value === null) return fallback;
   value = String(value).trim();
 

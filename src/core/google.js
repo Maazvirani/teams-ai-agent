@@ -19,10 +19,21 @@ const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 
 let cachedAccess = { token: '', expiresAt: 0 };
 
+// Learned from the first real request that reaches the server, so PUBLIC_URL
+// does not have to be set by hand just to make the Google redirect work.
+let detectedOrigin = '';
+
+function rememberOrigin(origin) {
+  if (origin && /^https?:\/\//i.test(origin)) detectedOrigin = origin.replace(/\/+$/, '');
+}
+
+function baseUrl() {
+  return config.publicUrl || detectedOrigin || `http://localhost:${config.port}`;
+}
+
 function redirectUri() {
   if (config.google.redirectUri) return config.google.redirectUri;
-  if (config.publicUrl) return `${config.publicUrl}/api/google/callback`;
-  return `http://localhost:${config.port}/api/google/callback`;
+  return `${baseUrl()}/api/google/callback`;
 }
 
 function authUrl(state) {
@@ -145,5 +156,6 @@ async function api(url, options = {}) {
 }
 
 module.exports = {
-  authUrl, exchangeCode, accessToken, api, isConnected, getTokens, disconnect, redirectUri, TOKEN_KEY,
+  authUrl, exchangeCode, accessToken, api, isConnected, getTokens, disconnect,
+  redirectUri, rememberOrigin, baseUrl, TOKEN_KEY,
 };
