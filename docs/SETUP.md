@@ -1,278 +1,301 @@
-# Getting V.I.R.A.N.I. live — click by click
+# Getting V.I.R.A.N.I. live
 
-No terminal required. Around 15 minutes. Everything here is free.
+**No credit card. No payment details. No terminal. No commands to type.**
+Everything below is done by clicking through free websites in a browser.
 
-Work through it in order. After **Step 4** you already have a talking assistant;
-steps 5–8 make it a proper 24/7 one.
-
----
-
-## Step 1 — Get the AI brain (2 min, free)
-
-1. Go to <https://aistudio.google.com/apikey>
-2. Sign in with any Google account → **Create API key**
-3. Copy the key (it starts with `AIza…`) and keep it somewhere safe for a minute
-
-> This is Google Gemini's free tier. No card, no billing. It is generous enough
-> for daily personal use.
+About 30 minutes end to end. After Part 1 (about 15 minutes) you have a working
+assistant you can talk to.
 
 ---
 
-## Step 2 — Deploy it (5 min, free)
+## What you will sign up for
 
-> ### ⚠ If Render asks for a credit card
+All four are free, and none of them asks for a card:
+
+| Service | What it gives VIRANI | Cost |
+|---|---|---|
+| **Google AI Studio** | The brain that thinks | Free |
+| **Back4App Containers** | The cloud that runs it 24/7 | Free |
+| **Upstash** | Permanent memory | Free |
+| **UptimeRobot** | Keeps it awake | Free |
+
+> **If any page asks for card or payment details, stop and back out.** None of
+> these four should. If one does, use the alternatives in
+> [`NO-CREDIT-CARD.md`](NO-CREDIT-CARD.md) instead.
 >
-> **Don't enter one.** The card prompt comes from the *Blueprint* flow, not from
-> free hosting. Creating the service by hand skips it entirely and gives you the
-> identical result — the only difference is that you type the settings in rather
-> than Render reading them from `render.yaml`.
->
-> Try **Step 2B** below instead of Step 2A. It takes about three minutes longer.
->
-> **If Render demands billing even for a manual Free web service**, its card
-> checks vary by account and country — don't fight it. Go straight to
-> [`NO-CREDIT-CARD.md`](NO-CREDIT-CARD.md), which covers running VIRANI from
-> your own computer in ten minutes (no signup at all) and three hosts that
-> never ask for a card.
+> Free plans do change. These were checked in August 2026, but you are the one
+> looking at the signup page — trust what you see over what this document says.
 
 ---
 
-## Step 2A — Deploy with a Blueprint (fastest, may ask for a card)
+# Part 1 — Get it talking
 
-1. Go to <https://render.com> → **Get Started** → sign in **with GitHub**
-2. **New +** → **Blueprint**
-3. Pick this repository (`teams-ai-agent`) and the branch
-   `claude/jarvis-ai-voice-agent-1xaoy5`
-4. Render finds `render.yaml` and shows a service called **virani** → **Apply**
-5. It now asks for the values it does not know. Fill in:
+## Step 1 — The brain (3 min)
 
-| Field | What to put |
+1. Open <https://aistudio.google.com/apikey>
+2. Sign in with any Google account
+3. Click **Create API key** → **Create API key in new project**
+4. Copy the key. It starts with `AIza`. Keep the tab open — you need it shortly.
+
+This is Google Gemini's free tier. No card, no billing.
+
+---
+
+## Step 2 — The memory (4 min)
+
+Do this now rather than later, so VIRANI never forgets anything from day one.
+
+1. Open <https://upstash.com> → **Sign Up** → continue with GitHub or Google
+2. Click **Create Database**
+3. Name it `virani`, pick the region closest to you, leave it on the free plan
+4. Click **Create**
+5. Scroll down to the **REST API** section
+6. Copy these two values somewhere safe:
+   - `UPSTASH_REDIS_REST_URL`
+   - `UPSTASH_REDIS_REST_TOKEN`
+
+This is what makes VIRANI remember your name, your contacts and your reminders
+permanently, even after the server restarts.
+
+---
+
+## Step 3 — The cloud (8 min)
+
+1. Open <https://www.back4app.com/signup-containers>
+2. Sign up — **Continue with GitHub** is easiest, since your code is on GitHub
+3. Once inside, click **Create new app** → choose **Containers as a Service**
+4. Click **Import from GitHub** and authorise Back4App to see your repositories
+   - If asked which repositories, choose **Only select repositories** and pick
+     `teams-ai-agent`
+5. Select the repository `teams-ai-agent`
+6. **Important — set the branch.** In the branch dropdown choose:
+
+   ```
+   claude/jarvis-ai-voice-agent-1xaoy5
+   ```
+
+7. Leave the build settings alone. Back4App finds the `Dockerfile` in the
+   repository and uses it automatically.
+8. If it asks for a **port**, enter `7860`.
+
+### Now add the settings
+
+Find the **Environment Variables** section on the same page and add each of
+these as a separate Name / Value pair:
+
+| Name | Value |
 |---|---|
-| `OWNER_PIN` | Any number you'll remember, e.g. `246810`. This is your password. |
-| `GEMINI_API_KEY` | The key from Step 1 |
-| `OWNER_NAME` | Your first name — VIRANI addresses you by it |
-| `PUBLIC_URL` | Leave blank for now; you fill it in at Step 3 |
+| `OWNER_PIN` | Any number you'll remember — this is your password |
+| `GEMINI_API_KEY` | The `AIza…` key from Step 1 |
+| `SESSION_SECRET` | Any long random string you make up |
+| `MEMORY_BACKEND` | `upstash` |
+| `UPSTASH_REDIS_REST_URL` | From Step 2 |
+| `UPSTASH_REDIS_REST_TOKEN` | From Step 2 |
+| `OWNER_NAME` | Maaz |
+| `OWNER_TIMEZONE` | `Asia/Karachi` |
+| `OWNER_CITY` | Karachi |
+| `WAKE_WORD` | `virani` |
 
-Everything else can keep its default. Click **Create / Deploy** and wait for the
-build to go green (1–2 minutes).
+Then click **Deploy**. The first build takes three to five minutes.
 
----
-
-## Step 2B — Deploy by hand (no credit card)
-
-Use this if Step 2A asked you for payment details.
-
-1. Render dashboard → **New +** → **Web Service** (*not* Blueprint)
-2. **Connect a repository** → authorise GitHub → pick `teams-ai-agent`
-3. Fill in the form:
-
-| Field | Value |
-|---|---|
-| Name | `virani` |
-| Branch | `claude/jarvis-ai-voice-agent-1xaoy5` |
-| Region | whichever is nearest you |
-| Root Directory | *leave blank* |
-| Runtime / Language | **Node** |
-| Build Command | `npm install` |
-| Start Command | `npm start` |
-| Instance Type | **Free** ← make sure this is selected |
-
-4. Scroll to **Environment Variables**. Rather than adding them one at a time,
-   click **Add from .env** and paste this whole block, editing the two lines
-   marked `CHANGE ME`:
-
-```
-OWNER_PIN=246810
-GEMINI_API_KEY=paste-your-AIza-key-here
-AI_PROVIDER=gemini
-GEMINI_MODEL=gemini-2.0-flash
-OWNER_NAME=Maaz
-OWNER_TIMEZONE=Asia/Karachi
-OWNER_CITY=Karachi
-WAKE_WORD=virani
-MEMORY_BACKEND=file
-TTS_PROVIDER=browser
-SESSION_SECRET=change-this-to-any-long-random-string
-```
-
-   `OWNER_PIN` and `SESSION_SECRET` are the two `CHANGE ME` lines — pick your own
-   PIN, and make the secret any long random string.
-
-5. **Create Web Service**. Wait for the build to go green.
-
-Then carry on with Step 3 exactly as written. `PUBLIC_URL` gets added there.
-
-> **Why this works:** `render.yaml` is only a convenience — it pre-fills the same
-> form. Nothing in VIRANI needs Blueprints, so a hand-made Free web service is
-> functionally identical.
+> **Your PIN is your password.** VIRANI can read your email and calendar once
+> you connect Google, so anyone with this PIN has that access too. Don't use 1234.
 
 ---
 
-## Step 3 — Tell it its own address (1 min)
+## Step 4 — Tell it its own address (2 min)
 
-1. At the top of the Render service page, copy your URL —
-   something like `https://virani.onrender.com`
-2. Go to **Environment** in the left sidebar
-3. Set `PUBLIC_URL` to that URL, **with no trailing slash**
-4. **Save changes** — Render redeploys automatically
+1. When the deploy finishes, Back4App shows your app's URL. It looks something
+   like `https://virani-abc123.b4a.run`. Copy it.
+2. Go back to **Settings** → **Environment Variables**
+3. Add one more:
+
+   | Name | Value |
+   |---|---|
+   | `PUBLIC_URL` | Your URL, **with no slash on the end** |
+
+4. Save. It redeploys automatically.
+
+**Check it worked:** open your URL with `/health` on the end. You should see
+`"status":"ok"` and `"tools":31`.
+
+> A trailing slash here is the most common mistake in the whole setup — it
+> breaks the Google connection later. `https://virani-abc123.b4a.run` is right.
+> `https://virani-abc123.b4a.run/` is wrong.
 
 ---
 
-## Step 4 — Open it and say hello (2 min)
+## Step 5 — Open it and install it (3 min)
 
-1. Open your URL **in Chrome on Android**, **Safari on iPhone**, or Chrome on a laptop
-2. Type your `OWNER_PIN` → **Authenticate**
+1. Open your URL on your phone — **Chrome** on Android, **Safari** on iPhone
+2. Type your PIN → **Authenticate**
 3. Tap the glowing core and say: *"What's the weather in Karachi tomorrow?"*
-4. Allow the microphone when the browser asks
+4. Allow the microphone when asked
+5. Install it to your home screen so it behaves like a real app:
+   - **Android:** menu **⋮** → *Add to Home screen* → *Install*
+   - **iPhone:** Share **↑** → *Add to Home Screen*
 
-**Install it as an app:**
-
-- **Android / Chrome:** menu **⋮** → *Add to Home screen* → *Install*
-- **iPhone / Safari:** Share **↑** → *Add to Home Screen*
-- **Desktop Chrome:** the ⊕ install icon in the address bar
-
-It now has its own icon and opens full-screen, with no browser chrome.
-
-> **Wake word:** tap **WAKE WORD: OFF** at the top to switch it on. VIRANI then
-> listens continuously and answers whenever you start a sentence with *"Virani…"*.
-> Keep the app open (or on-screen) for this — a browser cannot listen while closed.
+**Wake word:** tap **WAKE WORD: OFF** at the top to turn it on, then start
+sentences with *"Virani…"*. The app must be open on screen for this — no web app
+can listen while closed. That is a browser rule, not a limit of your build.
 
 ---
 
-## Step 5 — Turn on notifications (2 min)
+# Part 2 — Make it a real 24/7 assistant
 
-This is what makes reminders work when the app is closed.
+## Step 6 — Notifications (3 min)
 
-1. Open **⚙ Settings** → **Notifications**
-2. **Enable on this device** → allow the permission prompt
-3. **Send test notification** — it should appear on your phone
-4. Now try: *"Virani, remind me in two minutes to test this"* — then close the app
-   completely. The reminder will still arrive.
+This is what makes reminders arrive when the app is closed.
 
-> **iPhone note:** iOS only delivers web push to apps added to the Home Screen.
-> Do Step 4's *Add to Home Screen* first, then open it from the icon and enable
-> notifications there.
+1. Open VIRANI **from its home-screen icon** — not a browser tab
+2. **⚙ Settings** → **Notifications** → **Enable on this device** → allow
+3. Tap **Send test notification**. It should appear on your phone.
+4. Say: *"Virani, remind me in two minutes to test this."* Close the app fully
+   and wait.
+
+> **iPhone:** iOS only delivers notifications to apps added to the Home Screen.
+> If you skipped that in Step 5, go back and do it first.
 
 ---
 
-## Step 6 — Connect Gmail and Calendar (5 min, optional)
+## Step 7 — Keep it awake (3 min)
 
-Skip this if you don't want VIRANI touching your email.
+Free containers go to sleep when nothing is talking to them, which would delay
+your reminders. A free pinger keeps it awake.
 
-**6a. Create the Google app**
+1. Open <https://uptimerobot.com> → create a free account
+2. **Add New Monitor**
+3. Monitor Type: **HTTP(s)**
+4. URL: your address with `/health` on the end
+5. Monitoring Interval: **5 minutes**
+6. **Create Monitor**
 
-1. Go to <https://console.cloud.google.com/projectcreate> → create a project
-   called `VIRANI` → **Create**
-2. Left menu → **APIs & Services** → **Library**. Search for and **Enable**:
+---
+
+# Part 3 — Give it more reach
+
+Optional. Each one unlocks a category of commands. Do them in any order.
+
+## Step 8 — Gmail and Calendar (8 min)
+
+**First, create the Google app:**
+
+1. Open <https://console.cloud.google.com/projectcreate> → name it `VIRANI` → **Create**
+2. **APIs & Services** → **Library**. Search for and **Enable** both:
    - **Gmail API**
    - **Google Calendar API**
-3. Left menu → **OAuth consent screen**
-   - User type: **External** → **Create**
-   - App name `VIRANI`, your email in both support fields → **Save and continue**
-   - Scopes: **Save and continue** (VIRANI asks for them at runtime)
-   - **Test users** → **Add users** → add your own Gmail address → **Save**
-4. Left menu → **Credentials** → **Create credentials** → **OAuth client ID**
-   - Type: **Web application**, name `VIRANI`
-   - Under **Authorised redirect URIs** → **Add URI**, paste exactly:
-     `https://YOUR-URL.onrender.com/api/google/callback`
+3. **OAuth consent screen** → User type **External** → **Create**
+   - App name `VIRANI`, your email in both support fields
+   - **Save and continue** through the scopes page
+4. **Test users** → **Add users** → add your own Gmail address → **Save**
+5. **Credentials** → **Create credentials** → **OAuth client ID**
+   - Application type: **Web application**, name `VIRANI`
+   - **Authorised redirect URIs** → **Add URI** → paste your address with
+     `/api/google/callback` on the end
    - **Create**, then copy the **Client ID** and **Client secret**
 
-**6b. Give them to VIRANI**
+**Then hand them over:**
 
-1. Render → your service → **Environment**
-2. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` → **Save changes**
-3. Once it redeploys, open VIRANI → **⚙ Settings** → **Connect Google**
-4. Approve the access. Google will warn the app is unverified — that is normal
-   for an app only you use: **Advanced** → **Go to VIRANI (unsafe)** → **Continue**
+6. Back4App → **Settings** → **Environment Variables** → add:
+
+   | Name | Value |
+   |---|---|
+   | `GOOGLE_CLIENT_ID` | From step 5 |
+   | `GOOGLE_CLIENT_SECRET` | From step 5 |
+
+7. Once it redeploys: VIRANI → **⚙ Settings** → **Connect Google** → approve
+
+Google warns that the app is unverified. That is normal for an app only you use:
+**Advanced** → **Go to VIRANI (unsafe)** → **Continue**.
 
 Now try: *"Do I have any unread email?"* or *"What's on my calendar tomorrow?"*
 
 ---
 
-## Step 7 — Make memory permanent (3 min, recommended)
+## Step 9 — A more realistic voice (4 min)
 
-Render's free disk is wiped on every redeploy. Upstash keeps your memories,
-reminders and Google connection forever.
+The device voice is fine. This one sounds like the film. Free tier is about
+10,000 characters a month — roughly 150 spoken replies. No card required.
 
-1. Go to <https://upstash.com> → sign in with GitHub → **Create Database**
-2. Any name, pick the region nearest you, free tier → **Create**
-3. Scroll to **REST API** and copy the two values:
-   `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
-4. Render → **Environment** → paste both, and change `MEMORY_BACKEND` to
-   `upstash` → **Save changes**
-
----
-
-## Step 8 — Keep it awake 24/7 (2 min)
-
-Render's free tier sleeps after 15 idle minutes, which would delay reminders.
-
-1. Go to <https://uptimerobot.com> → free account
-2. **Add New Monitor** → type **HTTP(s)**
-3. URL: `https://YOUR-URL.onrender.com/health`, interval **5 minutes** → **Create**
-
-VIRANI is now genuinely always on.
-
----
-
-## Step 9 — The cinematic voice (3 min, optional)
-
-The free device voice is fine. This one sounds like the film.
-
-1. Sign up at <https://elevenlabs.io> (free tier: ~10,000 characters a month —
-   roughly 150 spoken replies)
+1. <https://elevenlabs.io> → free account
 2. Profile menu → **API Keys** → create one and copy it
-3. Optional: browse the **Voice Library**, pick a voice you like, and copy its
-   **Voice ID**. The default is *Adam* — deep and calm.
-4. Render → **Environment**:
-   - `TTS_PROVIDER` → `elevenlabs`
-   - `ELEVENLABS_API_KEY` → your key
-   - `ELEVENLABS_VOICE_ID` → the voice id (skip to keep Adam)
-5. **Save changes**. In VIRANI → ⚙ Settings → **Voice**, a **Cinematic voice**
-   switch now appears.
+3. Optional: **Voice Library** → pick a voice → copy its **Voice ID**
+4. Back4App → **Environment Variables**:
 
-If the quota runs out or the key stops working, VIRANI silently drops back to
-your device's voice — it never goes mute.
+   | Name | Value |
+   |---|---|
+   | `TTS_PROVIDER` | `elevenlabs` |
+   | `ELEVENLABS_API_KEY` | Your key |
+   | `ELEVENLABS_VOICE_ID` | `pNInz6obpgDQGcFmaJgB` (deep, calm — or your own) |
+
+If the quota runs out, VIRANI falls back to the device voice automatically. It
+degrades, it never goes silent.
 
 ---
 
-## Step 10 — Location awareness (30 seconds, optional)
+## Step 10 — Location and the morning briefing (2 min)
 
-⚙ Settings → **Awareness** → **Use my location** → allow the browser prompt.
+**Location:** VIRANI → **⚙ Settings** → **Awareness** → **Use my location** → allow.
 
 Now *"what's the weather"* means where you actually are, and *"find a pharmacy
-near me"* opens the map centred on you. Coordinates are sent with the message
-and never stored.
+near me"* opens the map centred on you. Coordinates are sent with the message and
+never stored.
 
-**Keep screen awake while listening** is on by default — without it the phone
-locks mid-conversation and stops hearing you.
+Leave **Keep screen awake while listening** switched on, or the phone locks
+mid-conversation and stops hearing you.
 
----
+**Morning briefing:** just say *"Virani, brief me every morning at eight."*
 
-## Optional extras
-
-**A spoken morning briefing.** Either say *"Virani, brief me every morning at
-eight"*, or set `DAILY_BRIEFING_TIME=08:00` in Render's Environment. At that time
-it gathers your weather, calendar, unread email, reminders and headlines, and
-pushes the whole briefing to your phone.
-
-**Keep your login across redeploys.** Render generates `SESSION_SECRET` for you.
-If you ever change it, every device has to type the PIN again.
-
-**Change its name or wake word.** Set `ASSISTANT_NAME` and `WAKE_WORD` in
-Environment. Pick a wake word that is easy for a speech engine — two or three
-syllables, and not a common English word.
-
-**Microsoft Teams as well.** Set `MicrosoftAppId` and `MicrosoftAppPassword`, and
-point your bot's messaging endpoint at `https://YOUR-URL.onrender.com/api/messages`.
-The Teams app package is in `appPackage/`.
+Or set it server-side — Back4App → Environment Variables → `DAILY_BRIEFING_TIME`
+= `08:00`. At that time it gathers your weather, calendar, unread email,
+reminders and headlines and pushes the whole briefing to your phone, spoken.
 
 ---
 
-## Checking it yourself
+# Try saying
 
-Open `https://YOUR-URL.onrender.com/health` in a browser. You should see the
-assistant name, the AI provider, and how many tools loaded (31 without Google,
-37 with it).
+```
+Virani, what's the weather tomorrow?
+Virani, remind me to call the bank at 4pm.
+Virani, save Ali's number as 0328 263 2052.
+Virani, WhatsApp Ali that I'm running twenty minutes late.
+Virani, call Ali.
+Virani, add milk, eggs and coffee to my shopping list.
+Virani, note that the office wifi password is bluebird-42.
+Virani, what's 17.5 percent of 240,000 split three ways?
+Virani, how much is 500 dollars in rupees?
+Virani, find a pharmacy near me.
+Virani, remember that I prefer short answers.
+Virani, what's happening in Pakistan today?
+Virani, play the Interstellar soundtrack on YouTube.
+Virani, do I have any unread email?
+```
 
-Something not working? → [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+---
+
+# Every setting
+
+| Name | Value | Needed for |
+|---|---|---|
+| `OWNER_PIN` | Your number | Signing in — required |
+| `GEMINI_API_KEY` | `AIza…` | Thinking — required |
+| `SESSION_SECRET` | Long random string | Staying signed in |
+| `PUBLIC_URL` | Your URL, no trailing slash | Google + notifications |
+| `MEMORY_BACKEND` | `upstash` | Permanent memory |
+| `UPSTASH_REDIS_REST_URL` | From Upstash | Permanent memory |
+| `UPSTASH_REDIS_REST_TOKEN` | From Upstash | Permanent memory |
+| `OWNER_NAME` | Maaz | How it addresses you |
+| `OWNER_TIMEZONE` | `Asia/Karachi` | Getting "6pm" right |
+| `OWNER_CITY` | Karachi | Default weather |
+| `WAKE_WORD` | `virani` | What you say aloud |
+| `GOOGLE_CLIENT_ID` | From Google Cloud | Gmail + Calendar |
+| `GOOGLE_CLIENT_SECRET` | From Google Cloud | Gmail + Calendar |
+| `TTS_PROVIDER` | `browser` or `elevenlabs` | Voice quality |
+| `ELEVENLABS_API_KEY` | From ElevenLabs | Cinematic voice |
+| `DAILY_BRIEFING_TIME` | `08:00` | Automatic briefing |
+| `AI_PROVIDER` | `gemini`, `groq`, `openai` | Switching brains |
+
+---
+
+Problems? → [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+Host asking for a card? → [`NO-CREDIT-CARD.md`](NO-CREDIT-CARD.md)

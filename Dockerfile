@@ -15,7 +15,7 @@ WORKDIR /app
 
 # Install dependencies first so this layer is cached between code changes.
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --omit=optional && npm cache clean --force
 
 COPY . .
 

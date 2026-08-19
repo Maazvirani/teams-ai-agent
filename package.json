@@ -13,11 +13,13 @@
     "tunnel": "node scripts/tunnel.js"
   },
   "dependencies": {
-    "botbuilder": "^4.23.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "web-push": "^3.6.7"
   },
   "author": "Virani",
-  "license": "MIT"
+  "license": "MIT",
+  "optionalDependencies": {
+    "botbuilder": "^4.23.1"
+  }
 }

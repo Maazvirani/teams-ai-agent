@@ -262,12 +262,17 @@ function page(title, body) {
 // ---------------------------------------------------------------------------
 // Optional: Microsoft Teams front door (same brain, text channel)
 // ---------------------------------------------------------------------------
+// botbuilder is an optional dependency, so a slim install (the default in the
+// container image) simply has no Teams channel. That must not stop the server.
+let teamsMounted = false;
 if (config.teamsEnabled) {
   try {
     // eslint-disable-next-line global-require
     require('./channels/teams').mount(app);
+    teamsMounted = true;
   } catch (err) {
     console.error('[teams] could not start:', err.message);
+    console.error('[teams] run "npm install botbuilder" if you want the Teams channel.');
   }
 }
 
@@ -307,7 +312,11 @@ async function start() {
     console.log(`  Tools       : ${toolRegistry.names().length} — ${toolRegistry.names().join(', ')}`);
     console.log(`  Voice       : ${voice.available() ? `elevenlabs (${config.tts.voiceId})` : 'browser (free)'}`);
     console.log(`  Google      : ${config.googleEnabled ? 'configured' : 'not configured'}`);
-    console.log(`  Teams       : ${config.teamsEnabled ? 'enabled at /api/messages' : 'off'}`);
+    console.log(
+      `  Teams       : ${
+        teamsMounted ? 'enabled at /api/messages' : config.teamsEnabled ? 'configured but botbuilder is not installed' : 'off'
+      }`
+    );
     if (!config.ownerPin) console.log('  ⚠  OWNER_PIN is not set — the app will refuse to sign anyone in.');
     if (!config.gemini.apiKey && config.aiProvider === 'gemini') {
       console.log('  ⚠  GEMINI_API_KEY is not set — get a free one at https://aistudio.google.com/apikey');

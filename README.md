@@ -47,18 +47,19 @@ falls back to the free voice automatically if the quota runs out.
 **→ Follow [`docs/SETUP.md`](docs/SETUP.md).** It is click-by-click, no terminal
 needed, about 15 minutes.
 
-**No credit card?** You never need one. If a host asks, see
-[`docs/NO-CREDIT-CARD.md`](docs/NO-CREDIT-CARD.md) — the repo ships a `Dockerfile`
+**No credit card, no terminal, no payment details** — the guide uses only free
+services that don't ask for one. If a host does ask, see
+[`docs/NO-CREDIT-CARD.md`](docs/NO-CREDIT-CARD.md); the repo ships a `Dockerfile`
 so it runs anywhere.
 
 The short version:
 
 1. Get a free **Gemini API key** — <https://aistudio.google.com/apikey>
-2. **Deploy** this repo to **Render.com** (free) — it reads `render.yaml` for you
-3. Set your **`OWNER_PIN`** and paste the Gemini key
-4. Open your new URL on your phone → **Add to Home Screen**
-5. Turn on **notifications** and (optionally) **connect Google**
-6. Point a free **UptimeRobot** ping at `/health` so it never sleeps
+2. Create a free **Upstash** database for permanent memory
+3. **Deploy** to **Back4App Containers** from GitHub — it uses the `Dockerfile`
+4. Add your settings, including **`OWNER_PIN`**, in its dashboard
+5. Open your new URL on your phone → **Add to Home Screen**
+6. Turn on **notifications**, and point a free **UptimeRobot** ping at `/health`
 
 ---
 
